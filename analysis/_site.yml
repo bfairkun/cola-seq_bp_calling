@@ -1,0 +1,17 @@
+name: "CoLa-seq_BP_calling"
+output_dir: ../docs
+navbar:
+  title: "CoLa-seq_BP_calling"
+  left:
+  - text: Home
+    href: index.html
+  - text: About
+    href: about.html
+  - text: License
+    href: license.html
+output:
+  workflowr::wflow_html:
+    toc: yes
+    toc_float: no
+    theme: cosmo
+    highlight: textmate
