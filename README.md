@@ -16,4 +16,4 @@ This repository contains code for calling branchpoints (BPs) from cotranscriptio
 1. For every base that is considered a BP, merge BPs that are within two bases of each other, considering only the highest scoring BP as the true BP.
 
 
-See the `code/README.md` for more details on how to run the code.
+See the `code/README.md` for more details on how to run the code, which takes the form of a snakemake pipeline. Among other preprocessing steps, this snakemake pipeline runs an Rscript that is very much similar to [this document](https://github.com/bfairkun/cola-seq_bp_calling/blob/main/documentation/ScoreBranchpointsComposite.pdf) which I created to document the most important part of the BP calling process.

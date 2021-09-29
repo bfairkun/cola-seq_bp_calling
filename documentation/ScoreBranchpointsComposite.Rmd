@@ -10,7 +10,7 @@ urlcolor: blue
 knitr::opts_chunk$set(echo = T,  warning = F, message = F)
 ```
 
-This Rmarkdown document walks through the relevant R code that does the bulk of the work for calling branchpoints from CoLa-seq data as described in the [README](https://github.com/bfairkun/cola-branchpoint) for this repository. It is basically a copy/paste of the relevent code in [this script]() which is executed as part of the snakemake. If you want to manually step through the code in this document, you should be able to if you have already ran the snakemake in the repo on the included test data and you start an R session with `code` as your working directory. The snakemake should do some preprocessing, and in this R, we will mostly just be summing log likelihoods to come up with a composite BP likelihood score. In my code I have been using words like probability and likelihood loosely to name variables. But I hope you get the gist of what I was trying to do. If anyone needs to better understand the BP calling process I used or modify it, I hope being able to see this code could be helpful.
+This Rmarkdown document walks through the relevant R code that does the bulk of the work for calling branchpoints from CoLa-seq data as described in the [README](https://github.com/bfairkun/cola-branchpoint) for this repository. It is basically a copy/paste of the relevent code in [this script](https://github.com/bfairkun/cola-seq_bp_calling/blob/main/code/scripts/ScoreBranchpointsComposite.R) which is executed as part of the snakemake. If you want to manually step through the code in this document, you should be able to if you have already ran the snakemake in the repo on the included test data and you start an R session with `code` as your working directory. The snakemake should do some preprocessing, and in this R, we will mostly just be summing log likelihoods to come up with a composite BP likelihood score. In my code I have been using words like probability and likelihood loosely to name variables. But I hope you get the gist of what I was trying to do. If anyone needs to better understand the BP calling process I used or modify it, I hope being able to see this code could be helpful.
 
 First let's load some libraries necessary for calling BPs on this test data:
 
@@ -418,7 +418,7 @@ ScoresPlot
 
 Ok. that looks good. The threshold (dotted-line) I added corresponds to the threshold used in the manuscript for calling BPs. This threshold was chosen based on precision and recall of high confidence branchpoints determined experimentally (see ROC curve in Fig1D in manuscript).
 
-Branchpoints are considered all regions that are above the threshold. Well not quite actually. What I do next (code isn't shown here, it is in the snakemake) is write out the bases that exceed the threshold as a bedfile (each entry is one base), then I merge bed entries within 2 bp of each other, then consider the max scoring base in each merged region as the final set of BPs.
+Branchpoints are considered all regions that are above the threshold. Well not quite actually. What I do next (code isn't shown here, it is in the snakemake [here](https://github.com/bfairkun/cola-seq_bp_calling/blob/c30b40b16c1345b89ccf91d5c829f1a3c72a1f94/code/Snakefile#L268-L282)) is write out the bases that exceed the threshold as a bedfile (each entry is one base), then I merge bed entries within 2 bp of each other, then consider the max scoring base in each merged region as the final set of BPs.
 
 ## Conclusion.
 
