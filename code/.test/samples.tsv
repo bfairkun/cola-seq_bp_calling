@@ -1,0 +1,2 @@
+Uniq_sample_name	Bam_file	BP_group	Fastq_R1_list	Fastq_R2_list
+Merged	.test/test_data/testdata.bam	MergedGroup		

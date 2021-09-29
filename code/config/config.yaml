@@ -1,5 +1,41 @@
-# This file should contain everything to configure the workflow on a global scale.
-# In case of sample based data, it should be complemented by a samples.tsv file that contains
-# one row per sample. It can be parsed easily via pandas.
+# Configure workflow
 
-samples: config/samples.tsv
+# tab separated file of samples. either a bam file path, or fastq file paths
+# are required. If both are supplied, only bam will be used. If fastq is
+# supplied (paired end required), will align reads as defined by rules in the
+# snakemake. If a sample has multiple fastq files, put them in the same field,
+# separated by commas. R1 and R2 must follow consistent order, so the pipeline
+# can properly concatenate those files before alignment. In order to group data
+# from multiple samples for the purpose of BP calling, set them to the same
+# BP_group
+samples: .test/samples.tsv
+
+# Some things might break if you choose a different reference genome?
+# This is the gencode primary assembly version I recommend, it is hg38 and has
+# chr to prefix chromosome numbers
+ref_fa_link:
+fasta: "/project2/gilad/bjf79/genomes/GRCh38_Gencode/PrimaryAssembly/GRCh38.primary_assembly.genome.fa"
+
+
+# Again, I recommend this annotation set (or any similarly formatted set) from
+# Gencode
+ref_gtf_link:
+gtf: "/project2/gilad/bjf79/genomes/GRCh38_Gencode/gencode.v29.annotation.gtf"
+
+# Number bases upstream of 5'ss to consider for edge of BP mapping. I haven't
+# tested if changing this breaks anything.
+UpstreamEdge: 100
+DownstreamEdge: 5
+
+# Number of bases upstream of BP to consider for BP postion weight matrix. I
+# haven't tested if changing this breaks anything... But if you want to change
+# this, you will definitely have to force-run the part of the pipeline that
+# creates the PWM, instead of using the one already included in this repo.
+# Using -3 and 2 means considering something like ctaAc
+NumBasesBeforeA: 3
+NumBasesAfterA: 1
+
+# The minimum number of putative lariat derived fragments (eg, that have a 5' end in the upstream 3'ss window for BP mapping) and cross or terminate at a 3'ss
+MinCoverage: 10
+
+Threshold: -8.881075
