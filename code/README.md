@@ -35,7 +35,11 @@ Install snakemake and the workflow's other dependencies via conda/mamba. If cond
 
 ### Step 2: Configure workflow
 
-Configure the workflow according to your needs via editing the file `config/config.yaml`. Use/modify the config yaml files in the `snakemake_profiles/slurm/` profile to run on UChicago RCC Midway with slurm scheduler.
+Configure the workflow according to your needs via editing the file `config/config.yaml`. Use/modify the config yaml files in the `snakemake_profiles/slurm/` profile to run on UChicago RCC Midway with slurm scheduler. Define samples tsv file referenced in `config/config.yaml` (eg `.test/samples.tsv` by default). See comments in `config/config.yaml` for more description of configuration. See below for description of the sample tsv file:
+
+#### samples tsv file:
+
+Comment lines (prefixed iwth '#') are ignored.  Each line must contain unique sample name.  If filepath is provided in Bam_file is and the file exists, the snakemake pipeline will use that. Otherwise, will align from paired gzipped fastq using rules defined in Snakefile (see 'include' statements). Fastq and bam must be paired end. If a sample has multiple fastq (eg a single library sequenced on two sequencing lanes creates two fastq), separate multiple fastq files by commas (no spaces) in the appropriate cell. Samples with multiple fastq will get combined before alignment to output a single bam.  Samples with the same BP_group value will get merged at the level of bam files before performing BP_calling. This test data demonstrates the pipeline. The first sample references a bam. The rest of the samples reference gzipped fastq files. The last two samples have two paired fastq files per sample.
 
 ### Step 3: Execute workflow
 
