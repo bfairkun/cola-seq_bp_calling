@@ -3,7 +3,7 @@ import os
 
 ###### Config file and sample sheets #####
 
-samples = pd.read_csv(".test/samples.tsv" ,sep='\t', index_col=0)
+samples = pd.read_csv(".test/samples.tsv" ,sep='\t', index_col=0, comment='#')
 # samples = pd.read_csv(config["samples"],sep='\t', index_col=0)
 
 BP_groups = samples['BP_group'].unique()

@@ -3,6 +3,7 @@ include: "rules/common.py"
 configfile: "config/config.yaml"
 
 ruleorder: MakeChrSizes_fromFirstBamProvided > MakeChrSizes_fromRefFa
+# ruleorder: BamsFromSampleList > BamsFromAlignedFastq
 
 rule all:
     input:

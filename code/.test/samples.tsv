@@ -1,2 +1,23 @@
+# Comment lines ignored.  Each line must contain unique sample name.  If
+# filepath is provided in Bam_file is and the file exists, will use that.
+# Otherwise, will align from paired gzipped fastq using rules defined in
+# Snakefile (see 'include' statements). If a sample has multiple fastq (eg a
+# single library sequenced on two sequencing lanes creates two fastq), separate
+# multiple fastq files by commas (no spaces) in the appropriate cell. Samples
+# with multiple fastq will get combined before alignment to output a single
+# bam.  Samples with the same BP_group value will get merged at the level of
+# bam files before performing BP_calling. This test data demonstrates the
+# pipeline. The first sample references a bam. The rest of the samples
+# reference gzipped fastq files. The last two samples have two paired fastq
+# files per sample.
 Uniq_sample_name	Bam_file	BP_group	Fastq_R1_list	Fastq_R2_list
 Merged	.test/test_data/testdata.bam	MergedGroup		
+camptothecin.YZ132		MergedFromFastq	.test/test_data/Split_camptothecin.YZ132.R1.fastq.gz	.test/test_data/Split_camptothecin.YZ132.R2.fastq.gz
+DMSO_ctrl_for_PlaB		MergedFromFastq	.test/test_data/Split_DMSO_ctrl_for_PlaB.R1.fastq.gz	.test/test_data/Split_DMSO_ctrl_for_PlaB.R2.fastq.gz
+DMSO.YZ131		MergedFromFastq	.test/test_data/Split_DMSO.YZ131.R1.fastq.gz	.test/test_data/Split_DMSO.YZ131.R2.fastq.gz
+flavopiridol.YZ133		MergedFromFastq	.test/test_data/Split_flavopiridol.YZ133.R1.fastq.gz	.test/test_data/Split_flavopiridol.YZ133.R2.fastq.gz
+PlaB		MergedFromFastq	.test/test_data/Split_PlaB.R1.fastq.gz	.test/test_data/Split_PlaB.R2.fastq.gz
+YZ111		MergedFromFastq	.test/test_data/Split_YZ111.R1.fastq.gz	.test/test_data/Split_YZ111.R2.fastq.gz
+YZ112		MergedFromFastq	.test/test_data/Split_YZ112.R1.fastq.gz	.test/test_data/Split_YZ112.R2.fastq.gz
+YZ151		MergedFromFastq	.test/test_data/Split_YZ151_1.R1.fastq.gz,.test/test_data/Split_YZ151_2.R1.fastq.gz	.test/test_data/Split_YZ151_1.R2.fastq.gz,.test/test_data/Split_YZ151_2.R2.fastq.gz
+YZ152		MergedFromFastq	.test/test_data/Split_YZ152_1.R1.fastq.gz,.test/test_data/Split_YZ152_2.R1.fastq.gz	.test/test_data/Split_YZ152_1.R2.fastq.gz,.test/test_data/Split_YZ152_2.R2.fastq.gz
