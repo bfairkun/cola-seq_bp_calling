@@ -1,26 +1,19 @@
 # Configure workflow
 
-# tab separated file of samples. either a bam file path, or fastq file paths
-# are required. If both are supplied, only bam will be used. If fastq is
-# supplied (paired end required), will align reads as defined by rules in the
-# snakemake. If a sample has multiple fastq files, put them in the same field,
-# separated by commas. R1 and R2 must follow consistent order, so the pipeline
-# can properly concatenate those files before alignment. In order to group data
-# from multiple samples for the purpose of BP calling, set them to the same
-# BP_group
+# tab separated file of samples. See configuration section of code/README.md
+# for more
+# https://github.com/bfairkun/cola-seq_bp_calling/blob/main/code/README.md
 samples: .test/samples.tsv
 
 # Some things might break if you choose a different reference genome?
 # This is the gencode primary assembly version I recommend, it is hg38 and has
 # chr to prefix chromosome numbers
-ref_fa_link:
-fasta: "/project2/gilad/bjf79/genomes/GRCh38_Gencode/PrimaryAssembly/GRCh38.primary_assembly.genome.fa"
+fasta: "/project2/yangili1/bjf79/ChromatinSplicingQTLs/code/ReferenceGenome/Fasta/GRCh38.primary_assembly.genome.fa"
 
 
 # Again, I recommend this annotation set (or any similarly formatted set) from
 # Gencode
-ref_gtf_link:
-gtf: "/project2/gilad/bjf79/genomes/GRCh38_Gencode/gencode.v29.annotation.gtf"
+gtf: "/project2/yangili1/bjf79/ChromatinSplicingQTLs/code/ReferenceGenome/Annotations/gencode.v34.primary_assembly.annotation.gtf"
 
 # Number bases upstream of 5'ss to consider for edge of BP mapping. I haven't
 # tested if changing this breaks anything.

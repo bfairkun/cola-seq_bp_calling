@@ -11,7 +11,7 @@ rule all:
         # Subsequent target rules can be specified below. They should start with all_*.
 
 
-include: "rules/other.smk"
+include: "rules/Alignment.smk"
 
 rule indexBamsInSampleSheet:
     input:

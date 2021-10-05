@@ -15,3 +15,5 @@ def GetBamList_For_BP_group(wildcards):
 def GetBaiList_For_BP_group(wildcards):
     return [i + ".bai" for i in samples.loc[samples['BP_group'] == wildcards.BP_group]['Bam_file']]
 
+
+# if config["samples"] == ".test/samples.tsv"
