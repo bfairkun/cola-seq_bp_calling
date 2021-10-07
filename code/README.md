@@ -14,6 +14,10 @@ The code is implemented as a snakemake. Some parameters for BP calling are set i
 
 In addition to BP mapping, I have included rules to tabulate BP usage at called BPs in each sample. I recommend grouping all samples together for BP calling to maximize BP discovery power, then tabulate sample specific BP counts. If you are working with vastly different tissue types, then you may consider grouping samples by tissue for BP calling.
 
+#### The snakemake dag:
+
+![Snakemake rule dag](dag.pdf?raw=true "Title")
+
 ## Usage
 
 ### Step 1: Install workflow and dependencies

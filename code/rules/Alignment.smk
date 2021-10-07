@@ -4,7 +4,7 @@ rule STAR_make_index:
     indicate anything). Ran on login node with success.
     """
     input:
-        fasta = config["fasta"]
+        fasta = config["fasta"],
         gtf = config["gtf"],
     output:
         index = "ReferenceGenome/STARIndex/chrLength.txt",
@@ -24,13 +24,17 @@ rule STAR_make_index:
 
 rule CopyAndMergeFastq:
     input:
+        R1 = GetFastqList_For_Sample("Fastq_R1_list"),
+        R2 = GetFastqList_For_Sample("Fastq_R2_list"),
     output:
-        output
+        R1 = "Fastq/{sample}/R1.fastq.gz",
+        R2 = "Fastq/{sample}/R2.fastq.gz",
     log:
-        "logs/CopyAndMergeFastq.log"
+        "logs/CopyAndMergeFastq/{sample}.log"
     shell:
         """
-        shell
+        cat {input.R1} > {output.R1} 2> {log}
+        cat {input.R2} > {output.R2} 2>> {log}
         """
 
 rule fastp:
@@ -38,68 +42,73 @@ rule fastp:
     clips adapters, can handle UMIs
     """
     input:
-        R1 = "Fastq/{Phenotype}/{IndID}/{Rep}.R1.fastq.gz",
-        R2 = "Fastq/{Phenotype}/{IndID}/{Rep}.R2.fastq.gz"
+        R1 = "Fastq/{sample}/R1.fastq.gz",
+        R2 = "Fastq/{sample}/R2.fastq.gz",
     output:
-        R1 = "FastqFastp/{Phenotype}/{IndID}/{Rep}.R1.fastq.gz",
-        R2 = "FastqFastp/{Phenotype}/{IndID}/{Rep}.R2.fastq.gz",
-        html = "FastqFastp/{Phenotype}/{IndID}/{Rep}.fastp.html",
-        json = "FastqFastp/{Phenotype}/{IndID}/{Rep}.fastp.json"
+        R1 = "FastqFastp/{sample}/R1.fastq.gz",
+        R2 = "FastqFastp/{sample}/R2.fastq.gz",
+        html = "FastqFastp/{sample}/fastp.html",
+        json = "FastqFastp/{sample}/fastp.json"
     params:
-        umi = GetFastpParamsUmi2,
-        I = "-I",
-        O = "-O"
+        Get_fastq_params
     resources:
         mem_mb = 8000
     log:
-        "logs/fastp/{Phenotype}.{IndID}.{Rep}.log"
+        "logs/fastp/{sample}.log"
     conda:
         "../envs/fastp.yml"
     shell:
         """
-        fastp -i {input.R1} {params.I} {input.R2} -o {output.R1} {params.O} {output.R2} --html
+        fastp -i {input.R1} -I {input.R2} -o {output.R1} -O {output.R2} {params} --html
         """
 
-rule STAR_Align_WASP:
+rule STAR_Align:
     input:
         index = "ReferenceGenome/STARIndex/chrLength.txt",
-        R1 = "FastqFastp/{Phenotype}/{IndID}/{Rep}.R1.fastq.gz",
-        R2 = "FastqFastp/{Phenotype}/{IndID}/{Rep}.R2.fastq.gz",
-        vcf = "ReferenceGenome/STAR_WASP_Vcfs/{Phenotype}/WholeGenome.vcf"
+        R1 = "FastqFastp/{sample}/R1.fastq.gz",
+        R2 = "FastqFastp/{sample}/R2.fastq.gz",
     output:
-        bam = "Alignments/STAR_Align/{Phenotype}/{IndID}/{Rep}/Aligned.sortedByCoord.out.bam",
-        align_log = "Alignments/STAR_Align/{Phenotype}/{IndID}/{Rep}/Log.final.out"
+        bam = "Alignments/STAR_Align/{sample}/Aligned.sortedByCoord.out.bam",
+        bai = "Alignments/STAR_Align/{sample}/Aligned.sortedByCoord.out.bam.bai",
+        align_log = "Alignments/STAR_Align/{sample}/Log.final.out"
     threads: 8
-    log: "logs/STAR_Align_WASP/{Phenotype}/{IndID}.{Rep}.log"
+    log: "logs/STAR_Align/{sample}.log"
     params:
         readMapNumber = -1,
         ENCODE_params = "--outFilterType BySJout --outFilterMultimapNmax 20  --alignSJoverhangMin 8 --alignSJDBoverhangMin 1 --outFilterMismatchNmax 999 --outFilterMismatchNoverReadLmax 0.04 --alignIntronMin 20 --alignIntronMax 1000000 --alignMatesGapMax 1000000",
-        WASP_params = "--waspOutputMode SAMtag --outSAMattributes NH HI AS nM XS vW --varVCFfile"
     resources:
         cpus_per_node = 9,
         mem = 58000,
-    wildcard_constraints:
-        Phenotype = "Expression.Splicing|chRNA.Expression.Splicing"
     shell:
         """
-        STAR --readMapNumber {params.readMapNumber} --outFileNamePrefix Alignments/STAR_Align/{wildcards.Phenotype}/{wildcards.IndID}/{wildcards.Rep}/ --genomeDir ReferenceGenome/STARIndex/ --readFilesIn {input.R1} {input.R2} --outSAMtype BAM SortedByCoordinate --readFilesCommand zcat --runThreadN {threads} --outSAMmultNmax 1 {params.WASP_params} {input.vcf} --limitBAMsortRAM 16000000000 {params.ENCODE_params} --outSAMstrandField intronMotif  &> {log}
+        STAR --readMapNumber {params.readMapNumber} --outFileNamePrefix Alignments/STAR_Align/{wildcards.sample}/ --genomeDir ReferenceGenome/STARIndex/ --readFilesIn {input.R1} {input.R2} --outSAMtype BAM SortedByCoordinate --readFilesCommand zcat --runThreadN {threads} --outSAMmultNmax 1 --limitBAMsortRAM 16000000000 {params.ENCODE_params} --outSAMstrandField intronMotif  &> {log}
+        samtools index {output.bam}
         """
 
 rule DedupStarAlignments:
+    """
+    If sample is from test config, it already has been deduped, so just make a
+    mock bam file with cp
+    """
     input:
-        bam = "Alignments/STAR_Align/{Phenotype}/{IndID}/{Rep}/Aligned.sortedByCoord.out.bam",
-        bai = "Alignments/STAR_Align/{Phenotype}/{IndID}/{Rep}/Aligned.sortedByCoord.out.bam.ba
+        bam = "Alignments/STAR_Align/{sample}/Aligned.sortedByCoord.out.bam",
+        bai = "Alignments/STAR_Align/{sample}/Aligned.sortedByCoord.out.bam.bai",
     output:
-        bam = "Alignments/STAR_Align/{Phenotype}/{IndID}/{Rep}/Aligned.sortedByCoord.out.dedup.
+        bam = temp("Alignments/STAR_Align/{sample}/Aligned.sortedByCoord.out.dedup.bam")
     resources:
         mem_mb = 12000
     log:
-        "logs/DedupStarAlignments/{Phenotype}/{IndID}.{Rep}.log"
+        "logs/DedupStarAlignments/{sample}.log"
     conda:
         "../envs/umi_tools.yml"
     params:
-        GetUmitoolsDedupParams
+        IsSampleFromTestConfig_smk_input_function
     shell:
         """
-        umi_tools dedup --paired -I {input.bam} -S {output.bam} -L {log} --umi-separator=: {par
+        if {params}
+        then
+            cp {input.bam} {output.bam}
+        else
+            umi_tools dedup --paired -I {input.bam} -S {output.bam} -L {log} --umi-separator=:
+        fi
         """

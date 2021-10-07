@@ -1,4 +1,5 @@
 *
+!dag.pdf
 !config
 !config/*
 !snakemake_profiles

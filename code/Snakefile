@@ -1,28 +1,51 @@
 
-include: "rules/common.py"
 configfile: "config/config.yaml"
+include: "rules/common.py"
+wildcard_constraints:
+    sample="|".join(samples.index),
+    BP_group="|".join(samples['BP_group'].unique())
 
 ruleorder: MakeChrSizes_fromFirstBamProvided > MakeChrSizes_fromRefFa
-# ruleorder: BamsFromSampleList > BamsFromAlignedFastq
+ruleorder: CopyBamFromSampleList > CopyBamFromAlignedFastq
 
 rule all:
     input:
-        # The first rule should define the default target files
-        # Subsequent target rules can be specified below. They should start with all_*.
-
+        expand("BP_calling/{BP_group}/CalledBranchesMerged.bed.gz", BP_group = samples['BP_group'].unique())
 
 include: "rules/Alignment.smk"
 
-rule indexBamsInSampleSheet:
+rule CopyBamFromSampleList:
     input:
-        "{SampleSheetBamFile}"
+        bam = lambda wildcards: require_at_least_one(samples.loc[wildcards.sample]['Bam_file'])
     output:
-        "{SampleSheetBamFile}.bai"
-    wildcard_constraints:
-        SampleSheetBamFile = "|".join(samples['Bam_file'])
+        bam = "Alignments/Final/{sample}.bam"
+    log:
+        "logs/GetBamAndIndex/{sample}.log"
     shell:
         """
-        samtools index {input}
+        cp {input.bam} {output.bam}
+        """
+
+rule CopyBamFromAlignedFastq:
+    input:
+        bam = "Alignments/STAR_Align/{sample}/Aligned.sortedByCoord.out.dedup.bam"
+    output:
+        bam = "Alignments/Final/{sample}.bam"
+    log:
+        "logs/CopyBamFromAlignedFastq/{sample}.log"
+    shell:
+        """
+        cp {input.bam} {output.bam}
+        """
+
+rule indexBam:
+    input:
+        bam = "Alignments/Final/{sample}.bam"
+    output:
+        bai = "Alignments/Final/{sample}.bam.bai"
+    shell:
+        """
+        samtools index {input.bam}
         """
 
 rule MergeBamsByBP_Group:
@@ -50,8 +73,6 @@ rule MakeChrSizes_fromFirstBamProvided:
 
 rule MakeChrSizes_fromRefFa:
     input:
-        # "bams/Merged.bam"
-        # first bam provided or ref fa
         ref_fa = config["fasta"]
     output:
         "Misc/Chrome.sizes"
