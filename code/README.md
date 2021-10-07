@@ -16,7 +16,7 @@ In addition to BP mapping, I have included rules to tabulate BP usage at called 
 
 #### The snakemake dag:
 
-![Snakemake rule dag](dag.pdf?raw=true "Title")
+![Snakemake rule dag](dag.png?raw=true "Title")
 
 ## Usage
 
