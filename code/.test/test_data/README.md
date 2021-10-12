@@ -42,8 +42,12 @@ test data to run snakemake pipeline on. All of the data is in some form data fro
 ├── testdata.bazam.R1.fastq.gz
 └── testdata.bazam.R2.fastq.gz
     # The R1 and R2 fastq output of:
-    # bazam -bam Merged.chr21.bam -L chr21:32,309,018-32,395,012 -r1 ~/cola-seq_bp_calling/code/.test/test_data/testdata.bazam.R1.fastq -r2 ~/cola-seq_bp_calling/code/.test/test_data/testdata.bazam.R2.fastq
+    # bazam -bam Merged.chr21.bam -L chr21:32,309,018-32,395,012 -r2 ~/cola-seq_bp_calling/code/.test/test_data/testdata.bazam.R1.fastq -r1 ~/cola-seq_bp_calling/code/.test/test_data/testdata.bazam.R2.fastq
     # Therefore, these contain all the reads in the specied region and their mate pairs
+    # Note that I swapped r1 and r2. This is because there is an issue with
+    # bazam (https://github.com/ssadedin/bazam/issues/31) wherein read pairs
+    # where R1 is on the minus strand (such as the minus stranded gene URB1 that
+    # the test data is based on) get swapped by bazam
 
 0 directories, 27 files
 ```

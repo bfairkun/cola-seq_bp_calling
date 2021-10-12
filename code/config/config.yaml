@@ -5,9 +5,12 @@
 # https://github.com/bfairkun/cola-seq_bp_calling/blob/main/code/README.md
 samples: .test/samples.tsv
 
-# Some things might break if you choose a different reference genome?
+# Some things might break if you choose a different reference genome?. So long
+# as you use a ref genome that is hg38 from Gencode you should be fine (and if
+# you provide bam files in the samples.tsv file, they should use the same
+# reference genome!)
 # This is the gencode primary assembly version I recommend, it is hg38 and has
-# chr to prefix chromosome numbers
+# chr to prefix chromosome numbers.
 fasta: "/project2/yangili1/bjf79/ChromatinSplicingQTLs/code/ReferenceGenome/Fasta/GRCh38.primary_assembly.genome.fa"
 
 
