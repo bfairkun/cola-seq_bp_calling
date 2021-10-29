@@ -1,25 +1,13 @@
 import pandas as pd
 import os
-import hashlib
 
 ###### Config file and sample sheets #####
 
-samples = pd.read_csv(".test/samples.tsv", sep="\t", index_col=0, comment="#")
 test_samples = pd.read_csv(".test/samples.tsv", sep="\t", index_col=0, comment="#")
-# samples = pd.read_csv(config["samples"],sep='\t', index_col=0)
+samples = pd.read_csv(config["samples"],sep='\t', index_col=0)
+## hardcode the test samples.tsv for easier debugging
+# samples = pd.read_csv(".test/samples.tsv", sep="\t", index_col=0, comment="#")
 
-# Check if samples file is the included test samples.tsv file. The fastq
-# samples in that file come from a bam that yi shared with me, so they need to
-# be processed sort of uniquely (eg, no adapter trimming, since adapters have
-# already been trimmed)
-Are_samples_test_samples = (
-    hashlib.md5(open(config["samples"], "rb").read()).hexdigest()
-    == "3fd2bc9a2c44229a5488a0cdd234cc3d"
-)
-# if Are_samples_test_samples:
-#     print("Using the test samples file (.test/samples.tsv) which has an appropriate checksum")
-# else:
-#     print("Using")
 
 BP_groups = samples["BP_group"].unique()
 
@@ -114,3 +102,4 @@ def Get_fastq_params(wildcards):
     # elif wildcards.sample == "Example"; return SomeOtherString
     else:
         return "--umi --umi_loc read2 --umi_len 6"
+

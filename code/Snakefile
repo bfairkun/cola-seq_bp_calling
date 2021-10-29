@@ -12,6 +12,7 @@ wildcard_constraints:
 
 ruleorder: MakeChrSizes_fromFirstBamProvided > MakeChrSizes_fromRefFa
 ruleorder: CopyBamFromSampleList > CopyBamFromAlignedFastq
+ruleorder: Get3ssMinusOnePosition_FromBed_ToDetermineWindows > Get3ssMinusOnePosition_FromGtf_ToDetermineWindows
 
 
 rule all:
@@ -99,20 +100,42 @@ rule MakeChrSizes_fromRefFa:
         samtools faidx -o {output} {input.ref_fa}
         """
 
+rule Get3ssMinusOnePosition_FromGtf_ToGetBPToAnnotated3ssDist:
+    input:
+        gtf=config["gtf"],
+        chromsizes="Misc/Chrome.sizes",
+    output:
+        ThressSS="Misc/ThreePrimeSS_FromGtf.bed",
+    shadow: "shallow"
+    shell:
+        """
+        scripts/gtf2leafcutter.pl -o Misc/leafcutter_parsed {input.gtf}
+        zcat Misc/leafcutter_parsed_all_introns.bed.gz | awk -F'\\t' -v OFS='\\t' '$6=="+" {{ print $1,$3-2,$3-1,$4,$5,$6 }} $6=="-" {{ print $1,$2,$2+1,$4,$5,$6 }}' | sort -t$'\\t' -u -k1,3 -k6,6 | bedtools sort -i - -g {input.chromsizes} > {output.ThressSS}
+        """
 
-rule Get3ssMinusOnePosition:
+rule Get3ssMinusOnePosition_FromGtf_ToDetermineWindows:
     input:
         gtf=config["gtf"],
         chromsizes="Misc/Chrome.sizes",
     output:
         ThressSS="Misc/ThreePrimeSS.bed",
-        Introns="Misc/leafcutter_parsed_all_introns.bed.gz",
+    shadow: "shallow"
     shell:
         """
         scripts/gtf2leafcutter.pl -o Misc/leafcutter_parsed {input.gtf}
-        zcat {output.Introns} | awk -F'\\t' -v OFS='\\t' '$6=="+" {{ print $1,$3-2,$3-1,$4,$5,$6 }} $6=="-" {{ print $1,$2,$2+1,$4,$5,$6 }}' | sort -t$'\\t' -u -k1,3 -k6,6 | bedtools sort -i - -g {input.chromsizes} > {output.ThressSS}
+        zcat Misc/leafcutter_parsed_all_introns.bed.gz | awk -F'\\t' -v OFS='\\t' '$6=="+" {{ print $1,$3-2,$3-1,$4,$5,$6 }} $6=="-" {{ print $1,$2,$2+1,$4,$5,$6 }}' | sort -t$'\\t' -u -k1,3 -k6,6 | bedtools sort -i - -g {input.chromsizes} > {output.ThressSS}
         """
 
+rule Get3ssMinusOnePosition_FromBed_ToDetermineWindows:
+    input:
+        bed=require_at_least_one([str(config["IntronsBed"])]),
+        chromsizes="Misc/Chrome.sizes",
+    output:
+        ThressSS="Misc/ThreePrimeSS.bed",
+    shell:
+        """
+        awk -F'\\t' -v OFS='\\t' '$6=="+" {{ print $1,$3-1,$3,$4,$5,$6 }} $6=="-" {{ print $1,$2,$2+1,$4,$5,$6 }}' {input.bed} | sort | uniq | bedtools sort -i - -g {input.chromsizes} > {output.ThressSS}
+        """
 
 rule GetU12Introns:
     output:
@@ -163,6 +186,7 @@ rule GrabReadStartsForReadsThatCross3ss:
         "logs/GrabReadStartsForReadsThatCross3ss/{BP_group}.log",
     shell:
         """
+        set +o pipefail;
         (samtools view -f99 -F256 -bh {input.bam} | bedtools intersect -a - -b {input.ThressSS} -split -s -sorted -g {input.chromsizes} | tee {output.PlusBam} | samtools view - | awk -F'\\t' -v OFS='\\t' '{{if($6~"^1S") Clip="T"; else Clip="F"; print $3,$4-1,$4,$1,Clip";"$4+$9-1,"+"}}' > {output.Plus} ) &> {log}
         samtools view -f83 -F256 -bh {input.bam} | bedtools intersect -a - -b {input.ThressSS} -split -s -sorted -g {input.chromsizes} | tee {output.MinusBam} | samtools view - | awk -F'\\t' -v OFS='\\t' '{{if($6~"M1S$") Clip="T"; else Clip="F"; print $3,$8-$9-2,$8-$9-1,$1,Clip";"$8,"-"}}' > {output.Minus}
         """
@@ -252,7 +276,7 @@ rule GetBradleyBranchesTrainingFeatures:
         fasta=config["fasta"],
         bed="../data/Bradley.hg38.bed",
         fai="Misc/Chrome.sizes",
-        ThreeSS="Misc/ThreePrimeSS.bed",
+        ThreeSS="Misc/ThreePrimeSS_FromGtf.bed",
         U12Introns="Misc/U12Introns.bed",
     output:
         bradley_weighted_bed="Misc/BradleyWeightedSubsample.bed",
@@ -310,7 +334,7 @@ rule SumLogProbabilities:
         Threshold=config["Threshold"],
         OutputBedgraphDebugs="FALSE",
     conda:
-        "envs/r_essentials.yml"
+        "envs/R_env.yaml"
     shell:
         """
         Rscript scripts/ScoreBranchpointsComposite.R {input.Frags} BP_calling/{wildcards.BP_group}/ {params} &> {log}

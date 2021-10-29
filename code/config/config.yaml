@@ -3,7 +3,7 @@
 # tab separated file of samples. See configuration section of code/README.md
 # for more
 # https://github.com/bfairkun/cola-seq_bp_calling/blob/main/code/README.md
-samples: .test/samples.tsv
+samples: ".test/samples.tsv"
 
 # Some things might break if you choose a different reference genome?. So long
 # as you use a ref genome that is hg38 from Gencode you should be fine (and if
@@ -18,7 +18,17 @@ fasta: "/project2/yangili1/bjf79/ChromatinSplicingQTLs/code/ReferenceGenome/Fast
 # Gencode
 gtf: "/project2/yangili1/bjf79/ChromatinSplicingQTLs/code/ReferenceGenome/Annotations/gencode.v34.primary_assembly.annotation.gtf"
 
-# Number bases upstream of 5'ss to consider for edge of BP mapping. I haven't
+# A bed file of intron coordinates to identify 3'ss to attempt branchpoint
+# calling for. If this is left blank, or if provided stranded bed file does not
+# exist,  will default to grabbing all introns from the gtf specified above.
+# The bed file 6 columns, with the 6th column indicating strand. I can't
+# remember exactly how all my code works, so to be safe, I suggest having the
+# 4th and 5th field of the bedfile being the host gene name as I have done in
+# the example bed file
+IntronsBed: ".test/test_data/test_introns.bed"
+# IntronsBed:
+
+# Number bases upstream of 3'ss to consider for edge of BP mapping. I haven't
 # tested if changing this breaks anything.
 UpstreamEdge: 100
 DownstreamEdge: 5
@@ -34,4 +44,9 @@ NumBasesAfterA: 1
 # The minimum number of putative lariat derived fragments (eg, that have a 5' end in the upstream 3'ss window for BP mapping) and cross or terminate at a 3'ss
 MinCoverage: 10
 
+# The composite score threshold for which to classify a base as a BP before
+# merging nearby BPs. A score of -8.881075 was used in the manuscript, since it
+# seemed reasonable based on specificity/recall analysis of a high-confidence
+# set of BPs. Setting a lower threshold will result in a larger, more
+# permissive set of BP calls
 Threshold: -8.881075

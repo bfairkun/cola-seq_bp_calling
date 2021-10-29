@@ -2,42 +2,37 @@ library(tidyverse)
 library(data.table)
 library(stringr)
 library(knitr)
-library(pROC)
 library(readr)
 
 ### This script outputs unscaled posterior probabilites for BP classification.
 
-##Params coded as global variables
+#Use hard coded arguments in interactive R session, else use command line args
+if(interactive()){
+    args <- scan(text=
+                 "BP_calling/MergedFromFastq/ColaPutativeBranchFragmentStarts.tab BP_calling/MergedFromFastq/ 0.1 0.5 10 5 100 -8.881075 FALSE", what='character')
+} else{
+    args <- commandArgs(trailingOnly=TRUE)
+}
+
+
 BpToDistanceTrainingData = "Misc/BradleyDistTo3ss.txt.gz"
 MotifProbabilityFunction = "BP_calling/MergedGroup/MotifPerBaseScores.txt.gz"
-ColaPutativeBranchStarts = "BP_calling/MergedGroup/ColaPutativeBranchFragmentStarts.tab"
-
-#output dir
-DirOut ="scratch/"
-
-pseudocount=0.1
-cola_data_bandwidth=0.5
-
-#Minimum cola-seq reads per window filter
-MinReadsPerWindow = 10
-
-#Distance from 3'ss to downstream edge of the window
-Window_downstream_dist_to_3ss=5
-Window_upstream_dist_to_3ss=100
-
-# Composite score theshold
-Threshold=-8.881075
 
 #Params parsed from command line to overwrite the hardcoded params for testing:
 args = commandArgs(trailingOnly=TRUE)
 ColaPutativeBranchStarts = args[1]
+#output dir
 DirOut = args[2]
 pseudocount = as.numeric(args[3])
 cola_data_bandwidth = as.numeric(args[4])
+#Minimum cola-seq reads per window filter
 MinReadsPerWindow = as.numeric(args[5])
+#Distance from 3'ss to downstream edge of the window
 Window_downstream_dist_to_3ss = as.numeric(args[6])
 Window_upstream_dist_to_3ss = as.numeric(args[7])
+# Composite score theshold
 Threshold = as.numeric(args[8])
+# TRUE or FALSE to output extra stuff to help debug
 OutputDebugBedgraphs = as.logical(args[9])
 
 dir.create(FigDir <-DirOut, recursive=T)
@@ -46,8 +41,7 @@ dir.create(FigDir <-DirOut, recursive=T)
 lengths <- read.delim(BpToDistanceTrainingData, col.names = c( "IntronType", "DistToBP" ), sep=" ") %>%
       filter(DistToBP<=Window_upstream_dist_to_3ss)
 
-dx<-density(lengths %>% filter(IntronType=="u2") %>% pull(DistToBP),
-            bw=3)
+dx<-density(lengths %>% filter(IntronType=="u2") %>% pull(DistToBP), bw=3)
 pmf.length <- as.data.frame(approx(dx$x,dx$y,xout=1:Window_upstream_dist_to_3ss)) %>%
   mutate(PositionScore=case_when(
     is.na(y) ~ log2(min(y, na.rm=T)),
