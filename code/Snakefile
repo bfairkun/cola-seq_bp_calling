@@ -29,7 +29,7 @@ include: "rules/Alignment.smk"
 rule CopyBamFromSampleList:
     input:
         bam=lambda wildcards: require_at_least_one(
-            samples.loc[wildcards.sample]["Bam_file"]
+            [samples.loc[wildcards.sample]["Bam_file"]]
         ),
     output:
         bam="Alignments/Final/{sample}.bam",
