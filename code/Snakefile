@@ -13,6 +13,10 @@ wildcard_constraints:
 ruleorder: MakeChrSizes_fromFirstBamProvided > MakeChrSizes_fromRefFa
 ruleorder: CopyBamFromSampleList > CopyBamFromAlignedFastq
 ruleorder: Get3ssMinusOnePosition_FromBed_ToDetermineWindows > Get3ssMinusOnePosition_FromGtf_ToDetermineWindows
+    
+localrules:
+    all,
+    GetU12Introns,
 
 
 rule all:
