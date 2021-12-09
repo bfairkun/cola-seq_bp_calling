@@ -181,6 +181,7 @@ dependencies:
   - r-tzdb=0.2.0=r41h03ef668_0
   - r-utf8=1.2.2=r41hcfec24a_0
   - r-uuid=1.0_3=r41hcfec24a_0
+  - r-r.utils=2.11.0=r41hc72bb7e_0
   - r-vctrs=0.3.8=r41hcfec24a_1
   - r-viridislite=0.4.0=r41hc72bb7e_0
   - r-vroom=1.5.6=r41h03ef668_0

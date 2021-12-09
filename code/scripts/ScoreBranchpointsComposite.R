@@ -82,6 +82,7 @@ MotifScores <- fread(MotifProbabilityFunction, check.names = F, header = T) %>%
 
 ## Make a smoothed prbability density function from cola-seq read ends
 FragStarts <- fread(ColaPutativeBranchStarts, col.names = c("feature", "Pos", "ReadName", "Extra")) %>%
+  filter(str_count(feature, "_")==5) %>%
   separate(feature, into=c("gene", "chrom", "windowStart", "windowStop", "strand", "IntronType"), sep="_", remove=F, convert=T) %>%
   separate(Extra, into=c("MismatchAtEnd", "ThreePrimeFragPos"), sep=";", convert=T) %>%
   mutate(ThreePrimeFragPos=ThreePrimeFragPos-1)
